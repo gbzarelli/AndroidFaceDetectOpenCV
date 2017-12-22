@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         } else {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, _baseLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, _baseLoaderCallback);
         }
         cascadeClassifier = new CascadeClassifier(mCascadeFile.getAbsolutePath());
         cascadeClassifier.load(mCascadeFile.getAbsolutePath());
