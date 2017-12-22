@@ -20,35 +20,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-/**
- * https://github.com/leadrien/opencv_native_androidstudio
- * Usage
- * <p>
- * Here is how to use this project to run native OpenCV code.
- * <p>
- * - Make sure you have Android SDK up to date, with NDK installed
- * - Download latest OpenCV SDK for Android from OpenCV.org and decompress the zip file.
- * - Create a symlink named jniLibs in app/src/main that points to YOUR_OPENCV_SDK/sdk/native/libs
- * - In app/CMakeLists.txt change line 9 to points to YOUR_OPENCV_SDK/sdk/native/jni/include
- * - Sync gradle
- * - Run the application
- */
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, Runnable {
 
-    private static final String TAG = "OCVSample::Activity";
-    private CameraBridgeViewBase _cameraBridgeViewBase;
+    private static final String TAG = "OCVSampleFaceDetect";
+    private CameraBridgeViewBase cameraBridgeViewBase;
 
-    private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
+    private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
 
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
-                    // Load ndk built module, as specified in moduleName in build.gradle
-                    // after opencv initialization
-                    System.loadLibrary("native-lib");
-                    _cameraBridgeViewBase.enableView();
+                    cameraBridgeViewBase.enableView();
                 }
                 break;
                 default: {
@@ -57,31 +41,30 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
     };
-    private volatile boolean proc = false;
+
+    private volatile boolean processing = false;
     private volatile boolean running = false;
     private volatile Mat matTmp;
 
     private CascadeClassifier cascadeClassifier;
     private File mCascadeFile;
-    private TextView info;
-    private MatOfRect matOfRect;
-
+    private TextView infoFaces;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
-        info = findViewById(R.id.tv);
+        infoFaces = findViewById(R.id.tv);
         try {
             loadFileCascade();
         } catch (Throwable t) {
             t.printStackTrace();
         }
-        _cameraBridgeViewBase = findViewById(R.id.main_surface);
-        _cameraBridgeViewBase.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
-        _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
-        _cameraBridgeViewBase.setCvCameraViewListener(this);
+        cameraBridgeViewBase = findViewById(R.id.main_surface);
+        cameraBridgeViewBase.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
+        cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
+        cameraBridgeViewBase.setCvCameraViewListener(this);
     }
 
     private void loadFileCascade() throws Throwable {
@@ -112,39 +95,28 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         super.onResume();
         if (OpenCVLoader.initDebug()) {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
-            _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+            baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         } else {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, _baseLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, baseLoaderCallback);
         }
         cascadeClassifier = new CascadeClassifier(mCascadeFile.getAbsolutePath());
         cascadeClassifier.load(mCascadeFile.getAbsolutePath());
         startFaceDetect();
     }
 
-    public void onDestroy() {
-        super.onDestroy();
-        disableCamera();
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        if (!processing) {
+            matTmp = inputFrame.gray();
+        }
+        return inputFrame.rgba();
     }
 
-    public void disableCamera() {
-        running = false;
-        if (_cameraBridgeViewBase != null)
-            _cameraBridgeViewBase.disableView();
-    }
 
     public void onCameraViewStarted(int width, int height) {
     }
 
     public void onCameraViewStopped() {
-    }
-
-
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        if (!proc) {
-            matTmp = inputFrame.rgba();
-        }
-        return inputFrame.rgba();
     }
 
 
@@ -159,23 +131,35 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         while (running) {
             try {
                 if (matTmp != null) {
-                    proc = true;
-                    matOfRect = new MatOfRect();
+                    processing = true;
+                    final MatOfRect matOfRect = new MatOfRect();
                     cascadeClassifier.detectMultiScale(matTmp, matOfRect);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            info.setText(String.format(getString(R.string.faces_detects), matOfRect.toList().size()));
+                            infoFaces.setText(String.format(getString(R.string.faces_detects), matOfRect.toList().size()));
                         }
                     });
                 }
-                Thread.sleep(200);
+                Thread.sleep(100);
             } catch (Throwable t) {
-                Log.e(TAG, "proc", t);
+                Log.e(TAG, "processing", t);
             } finally {
-                proc = false;
+                processing = false;
             }
         }
     }
+
+    public void onDestroy() {
+        super.onDestroy();
+        disableCamera();
+    }
+
+    public void disableCamera() {
+        running = false;
+        if (cameraBridgeViewBase != null)
+            cameraBridgeViewBase.disableView();
+    }
+
 }
 

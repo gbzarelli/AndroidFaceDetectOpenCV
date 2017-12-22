@@ -25,6 +25,11 @@ Utils:
 The openCVLibaray331 library inside the project contains the java code '/openCVLibrary331/src/main/java' copied from the `YOUR_OPENCV_SDK`/sdk/java/src folder.
 The aidl folder '/openCVLibrary331/src/main/aidl' contains the contents of `YOUR_OPENCV_SDK`/sdk/java/src/org/opencv/engine folder, keeping the same package.
 
+For detection we are using a Haar Cascade frontal face detection inserted in res/raw/haarcascade_frontalface_alt.xml
+
+We can find other Haar at:
+https://github.com/opencv/opencv/tree/master/data/haarcascades
+
 ----
 
 References: https://github.com/leadrien/opencv_native_androidstudio
