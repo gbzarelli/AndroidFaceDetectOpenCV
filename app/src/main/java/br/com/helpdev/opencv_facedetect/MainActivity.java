@@ -157,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void run() {
         running = true;
         while (running) {
-            
             try {
                 if (matTmp != null) {
                     proc = true;
