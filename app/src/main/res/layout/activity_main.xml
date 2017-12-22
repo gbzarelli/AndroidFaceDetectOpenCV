@@ -19,7 +19,7 @@
         android:id="@+id/tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="xxx"
+        android:text="FACES DETECTADAS: 0"
         android:textColor="@android:color/holo_red_dark"
         android:textSize="30sp"
         android:textStyle="bold" />

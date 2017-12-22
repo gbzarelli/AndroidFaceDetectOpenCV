@@ -42,9 +42,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     };
 
-    private volatile boolean processing = false;
     private volatile boolean running = false;
-    private volatile Mat matTmp;
+    private volatile int qtdFaces;
+    private volatile Mat matTmpProcessingFace;
 
     private CascadeClassifier cascadeClassifier;
     private File mCascadeFile;
@@ -106,8 +106,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        if (!processing) {
-            matTmp = inputFrame.gray();
+        if (matTmpProcessingFace == null) {
+            matTmpProcessingFace = inputFrame.gray();
         }
         return inputFrame.rgba();
     }
@@ -130,22 +130,28 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         running = true;
         while (running) {
             try {
-                if (matTmp != null) {
-                    processing = true;
-                    final MatOfRect matOfRect = new MatOfRect();
-                    cascadeClassifier.detectMultiScale(matTmp, matOfRect);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            infoFaces.setText(String.format(getString(R.string.faces_detects), matOfRect.toList().size()));
-                        }
-                    });
+                if (matTmpProcessingFace != null) {
+                    MatOfRect matOfRect = new MatOfRect();
+                    cascadeClassifier.detectMultiScale(matTmpProcessingFace, matOfRect);
+                    int newQtdFaces = matOfRect.toList().size();
+                    if (qtdFaces != newQtdFaces) {
+                        qtdFaces = newQtdFaces;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                infoFaces.setText(String.format(getString(R.string.faces_detects), qtdFaces));
+                            }
+                        });
+                    }
+                    Thread.sleep(500);//if you want an interval
+                    matTmpProcessingFace = null;
                 }
-                Thread.sleep(100);
+                Thread.sleep(50);
             } catch (Throwable t) {
-                Log.e(TAG, "processing", t);
-            } finally {
-                processing = false;
+                try {
+                    Thread.sleep(10_000);
+                } catch (Throwable tt) {
+                }
             }
         }
     }
@@ -156,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void disableCamera() {
+        System.out.println("disable");
         running = false;
         if (cameraBridgeViewBase != null)
             cameraBridgeViewBase.disableView();
