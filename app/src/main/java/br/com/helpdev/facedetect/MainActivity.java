@@ -1,7 +1,11 @@
-package br.com.helpdev.opencv_facedetect;
+package br.com.helpdev.facedetect;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -52,31 +56,53 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
         infoFaces = findViewById(R.id.tv);
-        try {
-            loadFileCascade();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
         cameraBridgeViewBase = findViewById(R.id.main_surface);
+        loadHaarCascadeFile();
+        checkPermissions();
+    }
+
+    private void checkPermissions() {
+        if (isPermissionGranted()) {
+            loadCameraBridge();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
+        }
+    }
+
+    private boolean isPermissionGranted() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        checkPermissions();
+    }
+
+    private void loadCameraBridge() {
         cameraBridgeViewBase.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
         cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         cameraBridgeViewBase.setCvCameraViewListener(this);
     }
 
-    private void loadFileCascade() throws Throwable {
-        File cascadeDir = getDir("haarcascade_frontalface_alt", Context.MODE_PRIVATE);
-        mCascadeFile = new File(cascadeDir, "haarcascade_frontalface_alt.xml");
+    private void loadHaarCascadeFile() {
+        try {
+            File cascadeDir = getDir("haarcascade_frontalface_alt", Context.MODE_PRIVATE);
+            mCascadeFile = new File(cascadeDir, "haarcascade_frontalface_alt.xml");
 
-        if (!mCascadeFile.exists()) {
-            FileOutputStream os = new FileOutputStream(mCascadeFile);
-            InputStream is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt);
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
+            if (!mCascadeFile.exists()) {
+                FileOutputStream os = new FileOutputStream(mCascadeFile);
+                InputStream is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt);
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+                is.close();
+                os.close();
             }
-            is.close();
-            os.close();
+        } catch (Throwable throwable) {
+            throw new RuntimeException("Failed to load Haar Cascade file");
         }
     }
 
@@ -89,6 +115,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onResume() {
         super.onResume();
+        if (!isPermissionGranted()) return;
+        resumeOCV();
+    }
+
+    private void resumeOCV() {
         if (OpenCVLoader.initDebug()) {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -157,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         disableCamera();
     }
 
-    public void disableCamera() {
+    private void disableCamera() {
         running = false;
         if (cameraBridgeViewBase != null)
             cameraBridgeViewBase.disableView();

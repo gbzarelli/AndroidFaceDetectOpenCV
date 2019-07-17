@@ -11,9 +11,9 @@ The application has been tested with:
 * Gradle '3.4.2'
 * OpenCV SDK '3.4.3'
 
-## Usage:
+## Configuration / Usage:
 
-Here is how to use this project to run native OpenCV code.
+Here is how to use this project to run native `OpenCV` code.
 
 * Make sure you have `Android SDK` up to date, with `NDK` installed
 * Download [OpenCV SDK 3.4.3](https://sourceforge.net/projects/opencvlibrary/files/opencv-android/) for Android from OpenCV.org and decompress the zip file.
@@ -22,8 +22,6 @@ Here is how to use this project to run native OpenCV code.
 * In `app/CMakeLists.txt` change line 9 to points to `${YOUR_HOME_OPENCV_SDK}/sdk/native/jni/include`
 * Sync gradle
 * Run the application
-
-----
 
 ### Notes:
 
