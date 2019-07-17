@@ -29,15 +29,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
-                    cameraBridgeViewBase.enableView();
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
+            if (status == LoaderCallbackInterface.SUCCESS) {
+                Log.i(TAG, "OpenCV loaded successfully");
+                cameraBridgeViewBase.enableView();
+            } else {
+                super.onManagerConnected(status);
             }
         }
     };
@@ -162,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void disableCamera() {
-        System.out.println("disable");
         running = false;
         if (cameraBridgeViewBase != null)
             cameraBridgeViewBase.disableView();

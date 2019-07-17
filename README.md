@@ -1,35 +1,49 @@
-Native OpenCV in Android Studio with face detect
-=================================
+# Native OpenCV in Android Studio with face detect
 
-This application is a sample Android Studio project (tested on gradle 3.0.1) with 'Android SDK OpenCV 3.3.1' 
-(https://sourceforge.net/projects/opencvlibrary/files/opencv-android/)
+This application is a sample of the `OpenCV` in Android. 
+In the sample we use the [OpenCV SDK](https://sourceforge.net/projects/opencvlibrary/files/opencv-android/)
+ to detect faces.
 
-----
+The application has been tested with:
 
-Usage:
+* Android Compile SDK '28'
+* Android Build Tools '28.0.3'
+* Gradle '3.4.2'
+* OpenCV SDK '3.4.3'
+
+## Usage:
 
 Here is how to use this project to run native OpenCV code.
 
-* Make sure you have Android SDK up to date, with NDK installed
-* Download latest OpenCV SDK for Android from OpenCV.org and decompress the zip file.
-* Clone this project
-* Create a symlink named `jniLibs` in `app/src/main` that points to `YOUR_OPENCV_SDK/sdk/native/libs`
-* In `app/CMakeLists.txt` change line 9 to points to `YOUR_OPENCV_SDK/sdk/native/jni/include`
+* Make sure you have `Android SDK` up to date, with `NDK` installed
+* Download [OpenCV SDK 3.4.3](https://sourceforge.net/projects/opencvlibrary/files/opencv-android/) for Android from OpenCV.org and decompress the zip file.
+* Clone [this project](https://github.com/gbzarelli/AndroidFaceDetectOpenCV)
+* Create a symlink named `jniLibs` in `app/src/main` that points to `${YOUR_HOME_OPENCV_SDK}/sdk/native/libs`
+* In `app/CMakeLists.txt` change line 9 to points to `${YOUR_HOME_OPENCV_SDK}/sdk/native/jni/include`
 * Sync gradle
 * Run the application
 
 ----
 
-Utils:
+### Notes:
 
-The openCVLibaray331 library inside the project contains the java code '/openCVLibrary331/src/main/java' copied from the `YOUR_OPENCV_SDK`/sdk/java/src folder.
-The aidl folder '/openCVLibrary331/src/main/aidl' contains the contents of `YOUR_OPENCV_SDK`/sdk/java/src/org/opencv/engine folder, keeping the same package.
+- The openCVLibaray343 library inside the project contains the java code of 
+`/openCVLibrary343/src/main/java`, copied from the `${YOUR_HOME_OPENCV_SDK}/sdk/java/src` folder.
 
-For detection we are using a Haar Cascade frontal face detection inserted in res/raw/haarcascade_frontalface_alt.xml
+- The aidl folder `/openCVLibrary343/src/main/aidl` contains the contents 
+of `${YOUR_HOME_OPENCV_SDK}/sdk/java/src/org/opencv/engine` folder, 
+keeping the same package.
 
-We can find other Haar at:
-https://github.com/opencv/opencv/tree/master/data/haarcascades
+- For detection we are using a `Haar Cascade` frontal face detection 
+inserted in `res/raw/haarcascade_frontalface_alt.xml` ( We can find other 
+Haar at: [GitHub Link](https://github.com/opencv/opencv/tree/master/data/haarcascades) )
 
 ----
 
-References: https://github.com/leadrien/opencv_native_androidstudio
+## Sample App Image
+
+<img src="faces_detected.png" width="400" >
+
+### References
+
+ - https://github.com/leadrien/opencv_native_androidstudio
